@@ -4,8 +4,11 @@ FROM python:3.10-slim
 # 设置工作目录
 WORKDIR /app
 
+# 替换 apt 源为阿里云镜像（解决国内网络 apt-get update 失败报错 code 100 的问题）
+RUN sed -i 's/deb.debian.org/[mirrors.aliyun.com/g](https://mirrors.aliyun.com/g)' /etc/apt/sources.list.d/debian.sources 2>/dev/null || sed -i 's/deb.debian.org/[mirrors.aliyun.com/g](https://mirrors.aliyun.com/g)' /etc/apt/sources.list 2>/dev/null || true
+
 # 安装系统级依赖库 (ONNX 和 PyMuPDF 在 Linux 下需要这些 C++ 运行库)
-RUN apt-get update && apt-get install -y \
+RUN apt-get clean && apt-get update --fix-missing && apt-get install -y \
     libgl1-mesa-glx \
     libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
