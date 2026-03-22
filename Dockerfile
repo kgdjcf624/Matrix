@@ -9,7 +9,7 @@ RUN sed -i 's/deb.debian.org/[mirrors.aliyun.com/g](https://mirrors.aliyun.com/g
 
 # 安装系统级依赖库 (ONNX 和 PyMuPDF 在 Linux 下需要这些 C++ 运行库)
 RUN apt-get clean && apt-get update --fix-missing && apt-get install -y \
-    libgl1-mesa-glx \
+    libgl1 \
     libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
