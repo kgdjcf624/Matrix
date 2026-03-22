@@ -50,18 +50,19 @@ def index():
     if request.method == 'GET':
         load_file = request.args.get('load')
         if load_file:
-            # 安全处理文件名，防止路径穿越攻击
-            safe_base_name = "".join([c for c in load_file if c.isalnum() or c in '_-'])
-            image_filename = f"{safe_base_name}.png"
-            json_filename = f"{safe_base_name}.json"
-            image_path = os.path.join(app.config['STATIC_FOLDER'], image_filename)
-            json_path = os.path.join(app.config['STATIC_FOLDER'], json_filename)
+            pdf_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+            file.save(pdf_path)
             
-            if os.path.exists(image_path) and os.path.exists(json_path):
-                print(f"⚡ 历史记录加载！正在极速打开 [{safe_base_name}]")
-                with open(json_path, 'r', encoding='utf-8') as f:
-                    ocr_data_json = f.read()
-                img = Image.open(image_path)
+            pdf_doc = fitz.open(pdf_path)
+            page = pdf_doc.load_page(0) 
+            # 🚀 内存与超时终极优化：Render 免费版只有 512MB 内存！
+            # 将 4x 渲染降为 2x，内存占用暴降 75%，防止服务器崩溃报 502
+            zoom = fitz.Matrix(2, 2)
+            pix = page.get_pixmap(matrix=zoom)
+            pix.save(image_path)
+            image_url = url_for('static', filename=image_filename)
+            
+            img = Image.open(image_path)
                 orig_w, orig_h = img.size
                 image_url = url_for('static', filename=image_filename)
                 
